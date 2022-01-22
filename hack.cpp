@@ -43,11 +43,11 @@ int findMyProc(const char *procname) {
 }
 
 int main(int argc, char* argv[]) {
-	int pid = 0; // process ID
+  int pid = 0; // process ID
 
-	pid = findMyProc(argv[1]);
-	if (pid) {
-		printf("PID = %d\n", pid);
-	}
-	return 0;
+  pid = findMyProc(argv[1]);
+  if (pid) {
+    printf("PID = %d\n", pid);
+  }
+  return 0;
 }
